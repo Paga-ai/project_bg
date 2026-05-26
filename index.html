@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DeepTree MCP Test</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f6f7f9;
+      color: #111827;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    .card {
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 24px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
+    }
+
+    h1 {
+      margin-top: 0;
+      font-size: 28px;
+    }
+
+    p {
+      line-height: 1.5;
+      color: #374151;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 120px;
+      padding: 14px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      font-size: 15px;
+      font-family: Arial, Helvetica, sans-serif;
+      resize: vertical;
+      box-sizing: border-box;
+    }
+
+    button {
+      margin-top: 16px;
+      padding: 12px 18px;
+      border-radius: 10px;
+      border: none;
+      background: #111827;
+      color: white;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+    }
+
+    .status {
+      margin-top: 16px;
+      font-weight: bold;
+    }
+
+    pre {
+      margin-top: 24px;
+      padding: 18px;
+      background: #111827;
+      color: #f9fafb;
+      border-radius: 10px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .hint {
+      margin-top: 20px;
+      padding: 14px;
+      border-radius: 10px;
+      background: #f3f4f6;
+      color: #374151;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1>DeepTree MCP Connection Test</h1>
+
+      <p>
+        Questo test verifica se il frontend su Vercel riesce a chiamare
+        <strong>evaluate.js</strong>, che a sua volta chiama OpenAI Responses API
+        usando DeepTree come remote MCP server.
+      </p>
+
+      <textarea id="userPrompt">Trova 5 aziende italiane nel packaging alimentare con ricavi tra 20 e 80 milioni di euro. Usa DeepTree se disponibile. Se DeepTree richiede autenticazione o non è disponibile, spiega l'errore esatto.</textarea>
+
+      <br />
+
+      <button id="testButton" onclick="runTest()">
+        Test DeepTree connection
+      </button>
+
+      <div id="status" class="status"></div>
+
+      <pre id="output">La risposta comparirà qui.</pre>
+
+      <div class="hint">
+        Non inserire API key in questa pagina. La chiave OpenAI deve stare solo nelle Environment Variables di Vercel.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function runTest() {
+      const button = document.getElementById("testButton");
+      const status = document.getElementById("status");
+      const output = document.getElementById("output");
+      const userPrompt = document.getElementById("userPrompt").value;
+
+      button.disabled = true;
+      status.textContent = "Test in corso...";
+      output.textContent = "Attendo risposta da /api/evaluate...";
+
+      try {
+        const response = await fetch("/api/evaluate", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            message: userPrompt
+          })
+        });
+
+        const data = await response.json();
+
+        status.textContent = response.ok
+          ? "Risposta ricevuta."
+          : "Errore ricevuto dal backend.";
+
+        output.textContent = JSON.stringify(data, null, 2);
+      } catch (error) {
+        status.textContent = "Errore frontend.";
+        output.textContent = JSON.stringify(
+          {
+            error: "Frontend request failed",
+            details: error instanceof Error ? error.message : String(error)
+          },
+          null,
+          2
+        );
+      } finally {
+        button.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>
