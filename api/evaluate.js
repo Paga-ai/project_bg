@@ -42,7 +42,7 @@ module.exports = async function handler(req, res) {
           server_label: "deeptree",
           server_description:
             "DeepTree company search and private market intelligence for Italian companies.",
-          server_url: "https://mcp.deeptreeai.com/",
+          server_url: "https://mcp.deeptreeai.com/mcp",
           require_approval: "never"
         }
       ]
@@ -74,7 +74,7 @@ module.exports = async function handler(req, res) {
       status: openaiResponse.status,
       statusText: openaiResponse.statusText,
       model_used: model,
-      deeptree_mcp_url: "https://mcp.deeptreeai.com/",
+      deeptree_mcp_url: "https://mcp.deeptreeai.com/mcp",
       data
     });
   } catch (error) {
